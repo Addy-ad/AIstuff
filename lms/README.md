@@ -38,11 +38,52 @@ The generated `model.yaml` uses the following structure:
 - **customFields**: Injects boolean toggles into the "Model Settings" sidebar with `setJinjaVariable` effects.
 
 
-Example Jinja temple to utilize the enable_thinking toggle
-```
+---
+
+### Implementation Guide: Jinja Template Integration
+
+To utilize the toggles created by this tool, your LM Studio Jinja template must be updated with the following logic.
+
+#### 1. Define the History Boundary
+Add this to the **very top** of your template. It calculates the index of the most recent user message so the template knows which "thoughts" belong to the past.
+
+\```jinja
+{%- set ns = namespace(last_user_idx=-1) -%}
+{%- for m in messages -%}
+    {%- if m.role == "user" -%}{%- set ns.last_user_idx = loop.index0 -%}{%- endif -%}
+{%- endfor -%}
+\```
+
+#### 2. Update the Assistant Logic
+Locate the section of your template handling the `assistant` role and replace it with the logic below.
+
+\```jinja
+{%- elif message.role == "assistant" -%}
+    {{- '<|im_start|>assistant\n' -}}
+    {%- set content = message.content | default('', true) -%}
+    {%- set reasoning = message.reasoning_content or '' -%}
+    
+    {#- Optimization Logic -#}
+    {%- if truncate_history_thinking and loop.index0 < ns.last_user_idx -%}
+        {{- '<think></think>\n' -}}
+    {%- elif (enable_thinking is not defined or enable_thinking == true) and reasoning -%}
+        {{- '<think>\n' + reasoning.strip() + '\n</think>\n\n' -}}
+    {%- endif -%}
+    
+    {{- content.strip() -}}
+    {{- '<|im_end|>\n' -}}
+\```
+
+#### 3. Update the Generation Prompt
+To ensure the `enable_thinking` toggle works for the current (active) response, use this block at the end of your template:
+
+\```jinja
 {%- if add_generation_prompt -%}
     {{- '<|im_start|>assistant\n' -}}
     {%- if enable_thinking is defined and enable_thinking == false -%}
         {{- '<think></think>\n' -}}
-    {%- else -%}{{- '<think>\n' -}}{%- endif -%}
+    {%- else -%}
+        {{- '<think>\n' -}}
+    {%- endif -%}
 {%- endif -%}
+\```
