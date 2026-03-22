@@ -36,3 +36,13 @@ The script performs the following actions:
 The generated `model.yaml` uses the following structure:
 - **metadataOverrides**: Forces `reasoning: true`.
 - **customFields**: Injects boolean toggles into the "Model Settings" sidebar with `setJinjaVariable` effects.
+
+
+Example Jinja temple to utilize the enable_thinking toggle
+```
+{%- if add_generation_prompt -%}
+    {{- '<|im_start|>assistant\n' -}}
+    {%- if enable_thinking is defined and enable_thinking == false -%}
+        {{- '<think></think>\n' -}}
+    {%- else -%}{{- '<think>\n' -}}{%- endif -%}
+{%- endif -%}
