@@ -4,6 +4,13 @@ A specialized utility for local LLM users to inject "Think" and "Truncate Thinki
 
 This tool runs based on the `~.lmstudio\.internal\model-index-cache.json` file in the LM Studio folder.
 
+Example:
+<img width="1108" height="623" alt="image" src="https://github.com/user-attachments/assets/71d54711-bd3b-4b39-98b8-10413e29ba74" />
+
+Original model and alias model with thinking button
+<img width="1173" height="288" alt="image" src="https://github.com/user-attachments/assets/75a480f8-c2c1-4e3d-853d-3d7fb8b3099e" />
+
+
 ## Overview
 
 Reasoning models (like Qwen 2.5/3.5 and DeepSeek) generate long internal monologues that consume significant context tokens. This tool generates a custom configuration for your local models to:
